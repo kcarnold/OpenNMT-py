@@ -9,6 +9,8 @@ def model_opts(parser):
     """
 
     # Embedding Options
+    parser.add_argument("-src_h5", type=str, default=None,
+                        help="hdf5 filename for src vectors.")
     group = parser.add_argument_group('Model-Embeddings')
     group.add_argument('-src_word_vec_size', type=int, default=500,
                        help='Word embedding size for src.')

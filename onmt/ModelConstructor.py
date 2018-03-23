@@ -13,7 +13,8 @@ from onmt.Models import NMTModel, MeanEncoder, RNNEncoder, \
                         StdRNNDecoder, InputFeedRNNDecoder
 from onmt.modules import Embeddings, ImageEncoder, CopyGenerator, \
                          TransformerEncoder, TransformerDecoder, \
-                         CNNEncoder, CNNDecoder, AudioEncoder
+                         CNNEncoder, CNNDecoder, AudioEncoder, \
+                         VecsEncoder
 from onmt.Utils import use_gpu
 from torch.nn.init import xavier_uniform
 
@@ -143,7 +144,7 @@ def make_base_model(model_opt, fields, gpu, checkpoint=None):
     Returns:
         the NMTModel.
     """
-    assert model_opt.model_type in ["text", "img", "audio"], \
+    assert model_opt.model_type in ["text", "img", "audio", "vecs"], \
         ("Unsupported model type %s" % (model_opt.model_type))
 
     # Make encoder.
@@ -165,6 +166,9 @@ def make_base_model(model_opt, fields, gpu, checkpoint=None):
                                model_opt.dropout,
                                model_opt.sample_rate,
                                model_opt.window_size)
+    elif model_opt.model_type == "vecs":
+        encoder = VecsEncoder(model_opt.rnn_size,
+                              model_opt.src_h5)
 
     # Make decoder.
     tgt_dict = fields["tgt"].vocab
