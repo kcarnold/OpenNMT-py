@@ -12,6 +12,7 @@ from onmt.io.DatasetBase import UNK_WORD, PAD_WORD, BOS_WORD, EOS_WORD
 from onmt.io.TextDataset import TextDataset
 from onmt.io.ImageDataset import ImageDataset
 from onmt.io.AudioDataset import AudioDataset
+from onmt.io.VecsDataset import VecsDataset
 
 
 def _getstate(self):
@@ -46,6 +47,8 @@ def get_fields(data_type, n_src_features, n_tgt_features):
         return ImageDataset.get_fields(n_src_features, n_tgt_features)
     elif data_type == 'audio':
         return AudioDataset.get_fields(n_src_features, n_tgt_features)
+    elif data_type == 'vecs':
+        return VecsDataset.get_fields(n_src_features, n_tgt_features)
 
 
 def load_fields_from_vocab(vocab, data_type="text"):
@@ -97,7 +100,7 @@ def get_num_features(data_type, corpus_file, side):
     """
     Args:
         data_type (str): type of the source input.
-            Options are [text|img|audio].
+            Options are [text|img|audio|vecs].
         corpus_file (str): file path to get the features.
         side (str): for source or for target.
 
@@ -112,6 +115,8 @@ def get_num_features(data_type, corpus_file, side):
         return ImageDataset.get_num_features(corpus_file, side)
     elif data_type == 'audio':
         return AudioDataset.get_num_features(corpus_file, side)
+    elif data_type == 'vecs':
+        return VecsDataset.get_num_features(corpus_file, side)
 
 
 def make_features(batch, side, data_type='text'):
@@ -120,7 +125,7 @@ def make_features(batch, side, data_type='text'):
         batch (Variable): a batch of source or target data.
         side (str): for source or for target.
         data_type (str): type of the source input.
-            Options are [text|img|audio].
+            Options are [text|img|audio|vecs].
     Returns:
         A sequence of src/tgt tensors with optional feature tensors
         of size (len x batch).
@@ -215,6 +220,12 @@ def build_dataset(fields, data_type, src_path, tgt_path, src_dir=None,
                                normalize_audio=normalize_audio,
                                use_filter_pred=use_filter_pred)
 
+    elif data_type == 'vecs':
+        dataset = VecsDataset(fields, src_examples_iter, tgt_examples_iter,
+                              num_src_feats, num_tgt_feats,
+                              tgt_seq_length=tgt_seq_length,
+                              use_filter_pred=use_filter_pred)
+
     return dataset
 
 
@@ -233,7 +244,7 @@ def build_vocab(train_dataset_files, fields, data_type, share_vocab,
     Args:
         train_dataset_files: a list of train dataset pt file.
         fields (dict): fields to build vocab for.
-        data_type: "text", "img" or "audio"?
+        data_type: "text", "img", "audio", or "vecs"?
         share_vocab(bool): share source and target vocabulary?
         src_vocab_path(string): Path to src vocabulary file.
         src_vocab_size(int): size of the source vocabulary.
@@ -351,6 +362,11 @@ def _make_examples_nfeats_tpl(data_type, src_path, src_dir,
                 src_path, src_dir, sample_rate,
                 window_size, window_stride, window,
                 normalize_audio)
+
+    elif data_type == 'vecs':
+        src_examples_iter, num_src_feats = \
+            VecsDataset.make_vec_examples_nfeats_tpl(
+                src_path, src_dir)
 
     return src_examples_iter, num_src_feats
 
