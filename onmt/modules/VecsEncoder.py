@@ -5,6 +5,7 @@ import torch
 from torch.autograd import Variable
 import h5py
 
+override_h5_filename = None
 
 class VecsEncoder(nn.Module):
     """
@@ -14,8 +15,8 @@ class VecsEncoder(nn.Module):
     """
     def __init__(self, rnn_size, h5_filename):
         super(VecsEncoder, self).__init__()
-        self.h5_filename = h5_filename
-        self.h5_file = h5py.File(h5_filename, 'r')
+        self.h5_filename = h5_filename if override_h5_filename is None else override_h5_filename
+        self.h5_file = h5py.File(self.h5_filename, 'r')
         self.h5_dataset = self.h5_file['image_features']
         self.num_vecs, self.num_objs, self.feature_dim = self.h5_dataset.shape
         self.init_hidden = nn.Linear(in_features=self.feature_dim, out_features=rnn_size, bias=True)
