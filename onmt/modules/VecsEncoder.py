@@ -33,7 +33,8 @@ class VecsEncoder(nn.Module):
 
         vecs = Variable(
             self.load_h5_data(input),
-            requires_grad=False)
+            requires_grad=False,
+            volatile=input.volatile)
 
         return self.forward_given_vecs(vecs)
 
